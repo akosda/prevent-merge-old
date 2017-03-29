@@ -41,10 +41,10 @@ def get_commit_hash(url):
 
 def is_timestamp_too_old(timestamp):
     current_timestamp = int(time.time() * 1000)
-    return current_timestamp - timestamp > 30 * 24 * 3600 * 1000
+    return current_timestamp - timestamp > 15 * 24 * 3600 * 1000
 
 def main():
-    j = jenkins_json_response('http://localhost:8080/api/json?pretty=true')
+    j = jenkins_json_response('http://localhost:8080/api/json')
     jobs = j["jobs"]
     blue_jobs = [j for j in jobs if is_blue_job(j)]
     blue_urls = [j[u'url'].encode('ascii') for j in blue_jobs]
