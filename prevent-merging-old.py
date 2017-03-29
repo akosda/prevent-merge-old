@@ -22,16 +22,22 @@ def is_blue_job(job):
     else:
         return False
 
+def get_last_completed_build_url(job_url):
+    j = jenkins_json_response('%s/api/json' % job_url)
+    return j[u'lastCompletedBuild'][u'url'].encode('ascii')
+
 def main():
     j = jenkins_json_response('http://localhost:8080/api/json?pretty=true')
     jobs = j["jobs"]
     blue_jobs = [j for j in jobs if is_blue_job(j)]
     blue_urls = [j[u'url'].encode('ascii') for j in blue_jobs]
-    for url in blue_urls:
-        print url
-        last_completed_build_json = jenkins_json_response('%s/api/json' % url)
-        print last_completed_build_json[u'lastCompletedBuild'][u'url']
-        print ""
+    last_build_urls = [get_last_completed_build_url(u) for u in blue_urls]
+    print last_build_urls
+    # for url in blue_urls:
+    #     print url
+    #     last_completed_build_json = jenkins_json_response('%s/api/json' % url)
+    #     print last_completed_build_json[u'lastCompletedBuild'][u'url']
+    #     print ""
 
 def debug():
     j = jenkins_json_response('http://localhost:8080/job/cred/api/json')
