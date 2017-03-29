@@ -2,6 +2,7 @@ import urllib2
 import base64
 import json
 import time
+import datetime
 
 jenkins_url = 'http://localhost:8080'
 
@@ -55,11 +56,12 @@ def main():
     blue_urls = [job[u'url'].encode('ascii') for job in blue_jobs]
     last_build_urls = [get_last_completed_build_url(url) for url in blue_urls]
     for build_url in last_build_urls:
-        print build_url
+        print 'Processing %s' % build_url
         timestamp = get_timestamp(build_url)
-        print timestamp
+        timestamp_date = datetime.datetime.fromtimestamp(timestamp / 1000).strftime('%c')
+        print 'Timestamp is %s (%s)' % (timestamp, timestamp_date)
         if(is_timestamp_too_old(timestamp)):
-            print "Job is NOT recent"
+            print "Job is NOT recent!"
             commit_hash = get_commit_hash(build_url)
             print "Setting status on commit hash %s" % commit_hash
         print ""
