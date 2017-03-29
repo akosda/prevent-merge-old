@@ -4,6 +4,7 @@ import json
 import time
 import datetime
 import sys
+import re
 
 jenkins_url = 'http://localhost:8080'
 
@@ -37,6 +38,11 @@ def is_blue_job(job):
     else:
         return False
 
+def is_pr_job(job):
+    regex = re.compile('PR-.*', re.IGNORECASE)
+    job_name = job[u'name'].encode('ascii')
+    return re.match(regex, job_name) is not None
+
 def get_last_completed_build_url(url):
     j = jenkins_json_response('%s/api/json' % url)
     return j[u'lastCompletedBuild'][u'url'].encode('ascii')
@@ -59,7 +65,8 @@ def is_timestamp_too_old(timestamp):
 
 def main():
     jobs = get_jobs(jenkins_url)
-    blue_jobs = [job for job in jobs if is_blue_job(job)]
+    pr_jobs = [job for job in jobs if is_pr_job(job)]
+    blue_jobs = [job for job in pr_jobs if is_blue_job(job)]
     blue_urls = [job[u'url'].encode('ascii') for job in blue_jobs]
     last_build_urls = [get_last_completed_build_url(url) for url in blue_urls]
     for build_url in last_build_urls:
