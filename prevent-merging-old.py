@@ -3,14 +3,21 @@ import base64
 import json
 import time
 import datetime
+import sys
 
 jenkins_url = 'http://localhost:8080'
+
+if len(sys.argv) < 2:
+    print 'User token not provided as argument'
+    sys.exit(1)
+
+user_token = sys.argv[1]
 
 def auth_headers(username, password):
     return 'Basic ' + base64.encodestring('%s:%s' % (username, password))[:-1]
 
 def jenkins_json_response(path):
-    auth = auth_headers('akoslocal', '623b34224508efb9bad027a7d29e1b3e')
+    auth = auth_headers('akoslocal', user_token)
     req = urllib2.Request(path)
     req.add_header('Authorization', auth)
     resp = urllib2.urlopen(req)
