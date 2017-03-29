@@ -2,9 +2,9 @@
 
 set -eux
 
-curl -XPOST -H "Authorization: token ${MY_GIT_TOKEN}" https://api.github.com/repos/akosda/prevent-merge-old/statuses/1e37f061ed8c6a0c82567495206dcc01b65b0aae -d "{
-  \"state\": \"success\",
+curl -XPOST -H "Authorization: token ${MY_GIT_TOKEN}" https://api.github.com/repos/akosda/prevent-merge-old/statuses/4d8ea62d0d45012401e63be3d2f61e6dcd58ee77 -d "{
+  \"state\": \"failure\",
   \"target_url\": \"http://job-url.com\",
-  \"description\": \"Job ran recently\",
+  \"description\": \"Job is outdated\",
   \"context\": \"continuous-integration/jenkins/pr-job-up-to-date-check\"
 }"

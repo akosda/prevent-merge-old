@@ -1,0 +1,11 @@
+# list blue job urls
+http://localhost:8080/api/xml?xpath=//job[color=%27blue%27]/url&wrapper=bluejoburls
+
+# get last completed build for a job
+http://localhost:8080/job/master-archive-commit-id/api/xml?xpath=//lastCompletedBuild/url
+
+# get build date
+http://localhost:8080/job/master-archive-commit-id/15/api/xml?xpath=//timestamp
+
+# get last build SHA1
+http://localhost:8080/job/master-archive-commit-id/15/api/xml?xpath=//lastBuiltRevision/SHA1
