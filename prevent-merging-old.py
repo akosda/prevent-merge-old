@@ -13,8 +13,21 @@ def jenkins_json(path):
     req.add_header('Authorization', auth)
     return json.load(urllib2.urlopen(req))
 
+def blue(job):
+    colorKey = u'color'
+    if colorKey in job:
+        if job[colorKey] == u'blue':
+            return True
+        else:
+            return False
+    else:
+        return False
+
 def main():
     j = jenkins_json('/api/json?pretty=true')
-    print j["jobs"]
+    jobs = j["jobs"]
+    blueJobs = [j for j in jobs if blue(j)]
+    blueUrls = [j[u'url'] for j in blueJobs]
+    print blueUrls
 
 main()
