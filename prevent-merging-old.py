@@ -60,8 +60,7 @@ def get_commit_hash(url):
 
 def is_timestamp_too_old(timestamp):
     current_timestamp = int(time.time() * 1000)
-    #return current_timestamp - timestamp > 1 * 3600 * 1000  # 12 hours
-    return current_timestamp - timestamp > 100  # 12 hours
+    return current_timestamp - timestamp > 1 * 3600 * 1000  # 12 hours
 
 def main():
     jobs = get_jobs(jenkins_url)
