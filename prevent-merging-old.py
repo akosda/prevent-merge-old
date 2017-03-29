@@ -1,6 +1,7 @@
 import urllib2
 import base64
 import json
+import time
 
 def auth_headers(username, password):
     return 'Basic ' + base64.encodestring('%s:%s' % (username, password))[:-1]
@@ -26,16 +27,36 @@ def get_last_completed_build_url(job_url):
     j = jenkins_json_response('%s/api/json' % job_url)
     return j[u'lastCompletedBuild'][u'url'].encode('ascii')
 
+def get_timestamp(url):
+    j = jenkins_json_response('%s/api/json' % url)
+    return j[u'timestamp']
+
+def get_commit_hash(url):
+    j = jenkins_json_response('%s/api/json' % url)
+    action = j[u'actions'][1]
+    commit = None
+    if u'lastBuiltRevision' in action:
+        commit = action[u'lastBuiltRevision'][u'SHA1']
+    return commit
+
+def is_timestamp_too_old(timestamp):
+    current_timestamp = int(time.time() * 1000)
+    return current_timestamp - timestamp > 30 * 24 * 3600 * 1000
+
 def main():
     j = jenkins_json_response('http://localhost:8080/api/json?pretty=true')
     jobs = j["jobs"]
     blue_jobs = [j for j in jobs if is_blue_job(j)]
     blue_urls = [j[u'url'].encode('ascii') for j in blue_jobs]
     last_build_urls = [get_last_completed_build_url(u) for u in blue_urls]
-    print last_build_urls
-
-def debug():
-    j = jenkins_json_response('http://localhost:8080/job/cred/api/json')
+    for build_url in last_build_urls:
+        print build_url
+        timestamp = get_timestamp(build_url)
+        print timestamp
+        if(is_timestamp_too_old(timestamp)):
+            print "Job is NOT recent"
+            commit_hash = get_commit_hash(build_url)
+            print "Setting status on commit hash %s" % commit_hash
+        print ""
 
 main()
-#debug()
