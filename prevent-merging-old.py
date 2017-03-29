@@ -13,6 +13,10 @@ def jenkins_json_response(path):
     resp = urllib2.urlopen(req)
     return json.load(resp)
 
+def get_jobs(url):
+    j = jenkins_json_response('%s/api/json' % url)
+    return j["jobs"]
+
 def is_blue_job(job):
     color_key = u'color'
     if color_key in job:
@@ -44,8 +48,8 @@ def is_timestamp_too_old(timestamp):
     return current_timestamp - timestamp > 15 * 24 * 3600 * 1000
 
 def main():
-    j = jenkins_json_response('http://localhost:8080/api/json')
-    jobs = j["jobs"]
+    #j = jenkins_json_response('http://localhost:8080/api/json')
+    jobs = get_jobs('http://localhost:8080')
     blue_jobs = [j for j in jobs if is_blue_job(j)]
     blue_urls = [j[u'url'].encode('ascii') for j in blue_jobs]
     last_build_urls = [get_last_completed_build_url(u) for u in blue_urls]
