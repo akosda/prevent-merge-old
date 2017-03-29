@@ -33,11 +33,6 @@ def main():
     blue_urls = [j[u'url'].encode('ascii') for j in blue_jobs]
     last_build_urls = [get_last_completed_build_url(u) for u in blue_urls]
     print last_build_urls
-    # for url in blue_urls:
-    #     print url
-    #     last_completed_build_json = jenkins_json_response('%s/api/json' % url)
-    #     print last_completed_build_json[u'lastCompletedBuild'][u'url']
-    #     print ""
 
 def debug():
     j = jenkins_json_response('http://localhost:8080/job/cred/api/json')
