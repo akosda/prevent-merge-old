@@ -6,6 +6,8 @@ import datetime
 import sys
 import re
 
+max_hours = 12
+
 if len(sys.argv) != 4:
     print 'Usage: %s <jenkins-url> <user> <token>' % sys.argv[0]
     sys.exit(1)
@@ -60,7 +62,7 @@ def get_commit_hash(url):
 
 def is_timestamp_too_old(timestamp):
     current_timestamp = int(time.time() * 1000)
-    return current_timestamp - timestamp > 1 * 3600 * 1000  # 12 hours
+    return current_timestamp - timestamp > max_hours * 3600 * 1000
 
 def main():
     jobs = get_jobs(jenkins_url)
@@ -72,11 +74,12 @@ def main():
         print 'Processing %s' % build_url
         timestamp = get_timestamp(build_url)
         timestamp_date = datetime.datetime.fromtimestamp(timestamp / 1000).strftime('%c')
-        print 'Timestamp is %s (%s)' % (timestamp, timestamp_date)
         if(is_timestamp_too_old(timestamp)):
-            print "Job is NOT recent!"
+            print "\tJob is outdated (> %s hours)! Setting its GitHub status..." % max_hours
             commit_hash = get_commit_hash(build_url)
-            print "Setting status on commit hash %s" % commit_hash
+            print "\tCommit hash: %s" % commit_hash
+        else:
+            print "\tOK"
         print ""
 
 main()
