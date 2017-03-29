@@ -6,13 +6,13 @@ import datetime
 import sys
 import re
 
-jenkins_url = 'http://ci.da-int.net/job/apollo'
-
-if len(sys.argv) < 2:
-    print 'User token not provided as argument'
+if len(sys.argv) != 4:
+    print 'Usage: %s <jenkins-url> <user> <token>' % sys.argv[0]
     sys.exit(1)
 
-user_token = sys.argv[1]
+jenkins_url = sys.argv[1]
+user_name   = sys.argv[2]
+user_token  = sys.argv[3]
 
 def auth_headers(username, password):
     return 'Basic ' + base64.encodestring('%s:%s' % (username, password)).replace('\n','')
@@ -20,7 +20,7 @@ def auth_headers(username, password):
     # to avoid invalid headers
 
 def jenkins_json_response(path):
-    auth = auth_headers('akos.fabian@digitalasset.com', user_token)
+    auth = auth_headers(user_name, user_token)
     req = urllib2.Request(path)
     req.add_header('Authorization', auth)
     resp = urllib2.urlopen(req)
@@ -63,24 +63,23 @@ def get_commit_hash(url):
 
 def is_timestamp_too_old(timestamp):
     current_timestamp = int(time.time() * 1000)
-    return current_timestamp - timestamp > 15 * 24 * 3600 * 1000
+    return current_timestamp - timestamp > 12 * 3600 * 1000  # 12 hours
 
 def main():
     jobs = get_jobs(jenkins_url)
-    print len(jobs)
-    # pr_jobs = [job for job in jobs if is_pr_job(job)]
-    # blue_jobs = [job for job in pr_jobs if is_blue_job(job)]
-    # blue_urls = [job[u'url'].encode('ascii') for job in blue_jobs]
-    # last_build_urls = [get_last_completed_build_url(url) for url in blue_urls]
-    # for build_url in last_build_urls:
-    #     print 'Processing %s' % build_url
-    #     timestamp = get_timestamp(build_url)
-    #     timestamp_date = datetime.datetime.fromtimestamp(timestamp / 1000).strftime('%c')
-    #     print 'Timestamp is %s (%s)' % (timestamp, timestamp_date)
-    #     if(is_timestamp_too_old(timestamp)):
-    #         print "Job is NOT recent!"
-    #         commit_hash = get_commit_hash(build_url)
-    #         print "Setting status on commit hash %s" % commit_hash
-    #     print ""
+    pr_jobs = [job for job in jobs if is_pr_job(job)]
+    blue_jobs = [job for job in pr_jobs if is_blue_job(job)]
+    blue_urls = [job[u'url'].encode('ascii') for job in blue_jobs]
+    last_build_urls = [get_last_completed_build_url(url) for url in blue_urls]
+    for build_url in last_build_urls:
+        print 'Processing %s' % build_url
+        timestamp = get_timestamp(build_url)
+        timestamp_date = datetime.datetime.fromtimestamp(timestamp / 1000).strftime('%c')
+        print 'Timestamp is %s (%s)' % (timestamp, timestamp_date)
+        if(is_timestamp_too_old(timestamp)):
+            print "Job is NOT recent!"
+            commit_hash = get_commit_hash(build_url)
+            print "Setting status on commit hash %s" % commit_hash
+        print ""
 
 main()
