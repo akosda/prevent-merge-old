@@ -55,15 +55,13 @@ def get_timestamp(url):
 
 def get_commit_hash(url):
     j = jenkins_json_response('%s/api/json' % url)
-    action = j[u'actions'][1]
-    commit = None
-    if u'lastBuiltRevision' in action:
-        commit = action[u'lastBuiltRevision'][u'SHA1']
-    return commit
+    revisions = [action[u'lastBuiltRevision'][u'SHA1'].encode('ascii') for action in j[u'actions'] if u'lastBuiltRevision' in action]
+    return revisions[0] if revisions else None
 
 def is_timestamp_too_old(timestamp):
     current_timestamp = int(time.time() * 1000)
-    return current_timestamp - timestamp > 12 * 3600 * 1000  # 12 hours
+    #return current_timestamp - timestamp > 1 * 3600 * 1000  # 12 hours
+    return current_timestamp - timestamp > 100  # 12 hours
 
 def main():
     jobs = get_jobs(jenkins_url)
