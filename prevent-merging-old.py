@@ -5,8 +5,7 @@ import time
 import datetime
 import sys
 import re
-
-max_hours = 12
+from urllib2 import urlopen, Request
 
 if len(sys.argv) != 5:
     print 'Usage: %s <jenkins-url> <jenkins-user> <jenkins-token> <github-token>' % sys.argv[0]
@@ -16,6 +15,8 @@ jenkins_url    = sys.argv[1]
 jenkins_user   = sys.argv[2]
 jenkins_token  = sys.argv[3]
 github_token   = sys.argv[4]
+github_base_url = 'https://api.github.com/repos/akosda/prevent-merge-old'
+max_hours = 12
 
 def auth_headers(username, password):
     return 'Basic ' + base64.encodestring('%s:%s' % (username, password)).replace('\n','')
@@ -65,7 +66,23 @@ def is_timestamp_too_old(timestamp):
     current_timestamp = int(time.time() * 1000)
     return current_timestamp - timestamp > max_hours * 3600 * 1000
 
-# def github_post(repo, commit, context, state, url, description):
+def github_post(repo, commit, context, state, job_url, description):
+    url = '%s/statuses/%s' % (repo, commit)
+    request = Request(url)
+    print url
+    request.add_header('Authorization', 'token %s' % github_token)
+    response = urlopen(request)
+    response_code = response.getcode()
+    response_text = response.read()
+    if response_code != 200:
+        print response_code
+        print response_text
+    else:
+        if response_text == "[]":
+            print "WARNING: status not set! Empty response from GitHub."
+        else:
+            print response_text
+            print 'GitHub commit status set.'
 
 
 def main():
@@ -87,3 +104,12 @@ def main():
         print ""
 
 main()
+
+# github_post(
+#     github_base_url,
+#     '4d8ea62d0d45012401e63be3d2f61e6dcd58ee77',
+#     'continuous-integration/jenkins/pr-job-up-to-date-check',
+#     'failure',
+#     'fake_url',
+#     'fake_description'
+#     )
