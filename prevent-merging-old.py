@@ -36,6 +36,7 @@ def get_jobs(url):
     return j["jobs"]
 
 def is_blue_job(job):
+    print job
     color_key = u'color'
     if color_key in job:
         if job[color_key] == u'blue':
