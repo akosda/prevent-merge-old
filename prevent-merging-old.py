@@ -7,15 +7,16 @@ import sys
 import re
 from urllib2 import urlopen, Request
 
-if len(sys.argv) != 5:
-    print 'Usage: %s <jenkins-url> <jenkins-user> <jenkins-token> <github-token>' % sys.argv[0]
+if len(sys.argv) != 7:
+    print 'Usage: %s <jenkins-url> <jenkins-user> <jenkins-token> <github-url> <github-token> <job-pattern>' % sys.argv[0]
     sys.exit(1)
 
-jenkins_url    = sys.argv[1]
-jenkins_user   = sys.argv[2]
-jenkins_token  = sys.argv[3]
-github_token   = sys.argv[4]
-github_base_url = 'https://api.github.com/repos/akosda/prevent-merge-old'
+jenkins_url      = sys.argv[1]
+jenkins_user     = sys.argv[2]
+jenkins_token    = sys.argv[3]
+github_base_url  = sys.argv[4]
+github_token     = sys.argv[5]
+job_pattern     = sys.argv[6]
 max_hours = 12
 
 def auth_headers(username, password):
@@ -45,7 +46,7 @@ def is_blue_job(job):
         return False
 
 def is_pr_job(job):
-    regex = re.compile('PR-.*', re.IGNORECASE)
+    regex = re.compile(job_pattern, re.IGNORECASE)
     job_name = job[u'name'].encode('ascii')
     return re.match(regex, job_name) is not None
 
