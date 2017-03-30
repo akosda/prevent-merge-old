@@ -69,7 +69,7 @@ def is_timestamp_too_old(timestamp):
 def github_post(repo, commit, context, state, job_url, description):
     url = '%s/statuses/%s' % (repo, commit)
     request = Request(url)
-    print url
+    print "Setting status on %s" % url
     request.add_header('Authorization', 'token %s' % github_token)
     response = urlopen(request)
     response_code = response.getcode()
@@ -96,20 +96,20 @@ def main():
         timestamp = get_timestamp(build_url)
         timestamp_date = datetime.datetime.fromtimestamp(timestamp / 1000).strftime('%c')
         if(is_timestamp_too_old(timestamp)):
-            print "\tJob is outdated (> %s hours)! Setting its GitHub status..." % max_hours
+            print "Job is outdated (did not run in the last %s hours)!" % max_hours
             commit_hash = get_commit_hash(build_url)
-            print "\tCommit hash: %s" % commit_hash
+            if commit_hash is not None:
+                github_post(
+                    github_base_url,
+                    commit_hash,
+                    'continuous-integration/jenkins/pr-job-up-to-date-check',
+                    'failure',
+                    build_url,
+                    'Job is outdated')
+            else:
+                print "WARNING: Could not determine commit ID!"
         else:
-            print "\tOK"
+            print "OK"
         print ""
 
 main()
-
-# github_post(
-#     github_base_url,
-#     '4d8ea62d0d45012401e63be3d2f61e6dcd58ee77',
-#     'continuous-integration/jenkins/pr-job-up-to-date-check',
-#     'failure',
-#     'fake_url',
-#     'fake_description'
-#     )
