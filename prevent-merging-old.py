@@ -88,8 +88,11 @@ def github_post(repo, commit, context, state, job_url, description):
 
 def main():
     jobs = get_jobs(jenkins_url)
+    print "%d jobs found" % len(jobs)
     pr_jobs = [job for job in jobs if is_pr_job(job)]
+    print "%d matched for pattern" % len(pr_jobs)
     blue_jobs = [job for job in pr_jobs if is_blue_job(job)]
+    print "%d blue and targeted to process " % len(blue_jobs)
     blue_urls = [job[u'url'].encode('ascii') for job in blue_jobs]
     last_build_urls = [get_last_completed_build_url(url) for url in blue_urls]
     for build_url in last_build_urls:
