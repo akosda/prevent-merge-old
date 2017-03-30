@@ -8,13 +8,14 @@ import re
 
 max_hours = 12
 
-if len(sys.argv) != 4:
-    print 'Usage: %s <jenkins-url> <user> <token>' % sys.argv[0]
+if len(sys.argv) != 5:
+    print 'Usage: %s <jenkins-url> <jenkins-user> <jenkins-token> <github-token>' % sys.argv[0]
     sys.exit(1)
 
-jenkins_url = sys.argv[1]
-user_name   = sys.argv[2]
-user_token  = sys.argv[3]
+jenkins_url    = sys.argv[1]
+jenkins_user   = sys.argv[2]
+jenkins_token  = sys.argv[3]
+github_token   = sys.argv[4]
 
 def auth_headers(username, password):
     return 'Basic ' + base64.encodestring('%s:%s' % (username, password)).replace('\n','')
@@ -22,7 +23,7 @@ def auth_headers(username, password):
     # to avoid invalid headers
 
 def jenkins_json_response(path):
-    auth = auth_headers(user_name, user_token)
+    auth = auth_headers(jenkins_user, jenkins_token)
     req = urllib2.Request(path)
     req.add_header('Authorization', auth)
     resp = urllib2.urlopen(req)
@@ -63,6 +64,9 @@ def get_commit_hash(url):
 def is_timestamp_too_old(timestamp):
     current_timestamp = int(time.time() * 1000)
     return current_timestamp - timestamp > max_hours * 3600 * 1000
+
+# def github_post(repo, commit, context, state, url, description):
+
 
 def main():
     jobs = get_jobs(jenkins_url)
